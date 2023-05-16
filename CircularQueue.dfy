@@ -1,3 +1,8 @@
+/*
+Cassiano Luis Flores Michel – 20204012-7
+José Eduardo Rodrigues Serpa - 2020311-7
+Pedro Menuzzi Mascaró – 20103702-5
+ */
 class CircularQueue {
     var tamanho: int;
     var inicio: int;
