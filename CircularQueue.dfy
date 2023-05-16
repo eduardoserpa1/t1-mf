@@ -5,49 +5,42 @@ class CircularQueue {
     var elementos: array<int>;
     ghost var filaAbstrata: seq<int>;
 
-    predicate IsValid() reads this, elementos {
+    predicate valido() reads this, elementos {
         0 <= inicio < elementos.Length &&
         0 <= fim < elementos.Length &&
         0 <= tamanho <= elementos.Length 
-        //tamanho == |filaAbstrata| 
-        //(forall i: int :: 0 <= i < tamanho ==> elementos[(inicio + i) % elementos.Length] == filaAbstrata[i])
     }
 
     constructor (cap: int)
     requires cap > 0
-    ensures IsValid() && tamanho == 0
+    ensures valido() && tamanho == 0
     {
         var newElementos := new int[cap];
         tamanho := 0;
         inicio := 0;
         fim := 0;
         elementos := newElementos;
-        //filaAbstrata := [];
+        filaAbstrata := [];
     }
 
-    method EstaVazia() returns (vazia: bool)
-    requires IsValid()
+    method vazia() returns (vazia: bool)
+    requires valido()
     ensures vazia <==> tamanho == 0
     {
         vazia := tamanho == 0;
     }
 
-    method Tamanho() returns (n: int)
-        requires IsValid()
+    method numero_elementos() returns (n: int)
+        requires valido()
         ensures n == tamanho
     {
         n := tamanho;
     }
 
     method Contem(element: int) returns (contains: bool)
-    requires IsValid()
-    //ensures contains ==> (forall i,j: int ::  0 <= i == j < tamanho ==> elementos[i] != element && exists j: int :: 0 <= j < elementos.Length && elementos[j] == element)
-    //ensures contains ==> (exists i:int :: 0 <= i < tamanho <= elementos.Length && elementos[i] == element)
-    //ensures contains ==> exists i :: 0 <= i < tamanho == elementos.Length && elementos[i] == element
-    //ensures contains == false ==> (forall i : int :: 0 <= i < tamanho == elementos.Length && elementos[i] != element)
-    //ensures contains == false ==>  0 >= tamanho == elementos.Length
-    //ensures contains ==> !(elementos.Length == 0)
-    ensures IsValid()
+    requires valido()
+    ensures elementos == old(elementos)
+    ensures valido()
     {
         var i := 0;
 
@@ -55,6 +48,7 @@ class CircularQueue {
 
         while(i < tamanho)
         invariant 0 <= i <= tamanho <= elementos.Length; 
+        invariant elementos == old(elementos)
         {
             if(elementos[(inicio + i) % elementos.Length] == element){
                 pertence := true;
@@ -66,9 +60,9 @@ class CircularQueue {
 
 
     method adicionar(element: int)
-    requires IsValid()
+    requires valido()
     modifies this
-    ensures IsValid()
+    ensures valido()
     ensures tamanho == old(tamanho) + 1
     {   
         var novoArray := new int[2 * elementos.Length];
@@ -116,15 +110,18 @@ class CircularQueue {
         
     }
 
-    method Remover() returns (valorRemovido: int)
-    requires IsValid()
-    requires tamanho > 0 //precisa?
+    method remover() returns (valorRemovido: int)
+    requires valido()
+    requires tamanho > 0
     modifies this
-    ensures IsValid()
+    ensures valido()
     ensures tamanho == old(tamanho) - 1
+    ensures 0 <= old(inicio) < elementos.Length
     {
         var novoArray_igual := new int[elementos.Length];
         var i := 0;
+
+        valorRemovido := elementos[inicio];
 
         while(i < tamanho) 
         invariant tamanho == old(tamanho);
@@ -139,7 +136,6 @@ class CircularQueue {
         }
 
         //filaAbstrata := filaAbstrata - [elementos[inicio]];
-        valorRemovido := elementos[inicio];
         inicio := (inicio + 1) % elementos.Length;
         tamanho := tamanho - 1;
         elementos := novoArray_igual;
@@ -149,29 +145,28 @@ class CircularQueue {
 method main()
 {
     var fila := new CircularQueue(5);
-    var tamanho := fila.Tamanho();
-    //var numero_elementos := fila.NumeroElementos();
-    var vazia := fila.EstaVazia();
+    var tamanho := fila.numero_elementos();
+    var vazia := fila.vazia();
 
     assert tamanho == 0;
-    //assert numero_elementos == 0;
+   
     assert vazia;
     
     fila.adicionar(1);
     fila.adicionar(2);
     fila.adicionar(3);
 
-    var tamanho_depois_de_adicionar := fila.Tamanho();
-    var vazia_depois_de_adicionar := fila.EstaVazia();
+    var tamanho_depois_de_adicionar := fila.numero_elementos();
+    var vazia_depois_de_adicionar := fila.vazia();
     var contem := fila.Contem(2);
 
     assert tamanho_depois_de_adicionar == 3;
     assert !vazia_depois_de_adicionar;
     //assert contem;
 
-    var valor_removido := fila.Remover();
-    valor_removido := fila.Remover();
-    var tamanho_depois_de_remover := fila.Tamanho();
+    var valor_removido := fila.remover();
+    valor_removido := fila.remover();
+    var tamanho_depois_de_remover := fila.numero_elementos();
 
     assert tamanho_depois_de_remover == 1;
     //assert valor_removido == 2;
