@@ -3,7 +3,7 @@ class CircularQueue {
     var inicio: int;
     var fim: int;
     var elementos: array<int>;
-    ghost var filaAbstrata: seq<int>;
+    ghost var fila: seq<int>;
 
     predicate valido() reads this, elementos {
         0 <= inicio < elementos.Length &&
@@ -20,7 +20,7 @@ class CircularQueue {
         inicio := 0;
         fim := 0;
         elementos := newElementos;
-        filaAbstrata := [];
+        fila := [];
     }
 
     method vazia() returns (vazia: bool)
@@ -89,7 +89,7 @@ class CircularQueue {
             novoArray[fim] := element;
             fim := (fim + 1) % elementos.Length;
             tamanho := tamanho + 1;
-            filaAbstrata := filaAbstrata + [element];
+            fila := fila + [element];
             elementos := novoArray;
         } else {
             var novoArray_igual := new int[elementos.Length];
@@ -109,7 +109,7 @@ class CircularQueue {
             novoArray_igual[fim] := element;
             fim := (fim + 1) % novoArray_igual.Length;
             tamanho := tamanho + 1;  
-            filaAbstrata := filaAbstrata + [element];
+            fila := fila + [element];
             elementos := novoArray_igual;
         }
         
@@ -126,13 +126,14 @@ class CircularQueue {
         var novoArray_igual := new int[elementos.Length];
         var i := 0;
 
-        valorRemovido := elementos[inicio];
+        var removido := 0;
 
         while(i < tamanho) 
         invariant tamanho == old(tamanho);
         invariant 0 <= i <= tamanho <= novoArray_igual.Length == elementos.Length;
         invariant 0 <= inicio < elementos.Length;
         invariant 0 <= fim < elementos.Length; 
+        invariant removido == 0
         {
             if(i != inicio){
                 novoArray_igual[i] := elementos[i];
@@ -140,11 +141,14 @@ class CircularQueue {
             i := i + 1;
         }
 
-        //filaAbstrata := filaAbstrata - [elementos[inicio]];
+        removido := elementos[inicio];
+        assert removido == elementos[inicio];
         inicio := (inicio + 1) % elementos.Length;
         tamanho := tamanho - 1;
         elementos := novoArray_igual;
-    }    
+        valorRemovido := removido;
+    }   
+
 }
 
 method main()
@@ -154,7 +158,6 @@ method main()
     var vazia := fila.vazia();
 
     assert tamanho == 0;
-   
     assert vazia;
     
     fila.adicionar(1);
@@ -167,28 +170,20 @@ method main()
 
     assert tamanho_depois_de_adicionar == 3;
     assert !vazia_depois_de_adicionar;
-    assert contem_elemento;
+
+    fila.adicionar(4);
+    fila.adicionar(5);
+    fila.adicionar(6);
+    fila.adicionar(7);
+
+    var tamanho_depois_de_realocar := fila.numero_elementos();
+
+    assert tamanho_depois_de_realocar == 7;
 
     var valor_removido := fila.remover();
     valor_removido := fila.remover();
     var tamanho_depois_de_remover := fila.numero_elementos();
 
-    assert tamanho_depois_de_remover == 1;
-    //assert valor_removido == 2;
+    assert tamanho_depois_de_remover == 5;
+    
 }
-
-/*
-
-x Realizar a concatenação de duas filas, retornando uma nova fila como resultado, sem 
-alterar as filas originais.
-
-(funcionando) Retornar o número de elementos da fila.
-(funcionando) Adicionar um novo elemento na fila.
-(funcionando) Verificar se a fila é vazia ou não.
-(funcionando) Construtor deve instanciar uma fila vazia.
-
-x(funcionando, porém não prova o elemento removido) Remover um elemento da fila e retornar seu valor caso a fila contenha elementos.
-x(testar, fazer pós condição) Verificar se um determinado elemento pertence o não a fila.
-
-
-*/
