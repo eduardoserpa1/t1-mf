@@ -24,18 +24,15 @@
         inicio := 0;
         fim := tamanho;
         
-        
         novoArray[fim] := element;
         fim := (fim + 1) % elementos.Length;
         tamanho := tamanho + 1;
         filaAbstrata := filaAbstrata + [element];
         elementos := novoArray;
     }
-    */
+*/
 
-
-
-class CircularQueue{
+class CircularQueue {
     var tamanho: int;
     var inicio: int;
     var fim: int;
@@ -61,7 +58,6 @@ class CircularQueue{
         elementos := newElementos;
         //filaAbstrata := [];
     }
-
 
     method EstaVazia() returns (vazia: bool)
     requires IsValid()
@@ -95,14 +91,12 @@ class CircularQueue{
         contains := false;
     }
 
-    
-    method adicionar(element: int)
+
+    method Adicionar(element: int)
     requires IsValid()
     modifies this
     ensures IsValid()
     {   
-        
-
         var novoArray := new int[2 * elementos.Length];
         if (tamanho == elementos.Length) {
             
@@ -125,7 +119,7 @@ class CircularQueue{
             tamanho := tamanho + 1;
             //filaAbstrata := filaAbstrata + [element];
             elementos := novoArray;
-        }else if(tamanho < elementos.Length){
+        } else if (tamanho < elementos.Length) {
             var novoArray_igual := new int[elementos.Length];
             var i := 0;
             while(i < tamanho) 
@@ -145,12 +139,19 @@ class CircularQueue{
             }
             elementos := novoArray_igual;
         }
-
     }
-    
 
-    
-
+    method Remover() returns (valorRemovido: int)
+    requires IsValid()
+    requires tamanho > 0 //precisa?
+    modifies this
+    ensures IsValid()
+    ensures tamanho == old(tamanho) - 1
+    {
+        valorRemovido := elementos[inicio];
+        inicio := (inicio + 1) % elementos.Length;
+        tamanho := tamanho - 1;
+    }    
 }
 
 method main()
@@ -171,15 +172,17 @@ method main()
     
     assert esta_vazia;
 }
-
-
 /*
+
 x Construtor deve instanciar uma fila vazia.
-(testar) Adicionar um novo elemento na fila.
-• Remover um elemento da fila e retornar seu valor caso a fila contenha elementos.
-(testar) Verificar se um determinado elemento pertence o não a fila.
 x Retornar o número de elementos da fila.
 x Verificar se a fila é vazia ou não.
+x Remover um elemento da fila e retornar seu valor caso a fila contenha elementos.
+
+(testar) Adicionar um novo elemento na fila.
+(testar) Verificar se um determinado elemento pertence o não a fila.
+
 • Realizar a concatenação de duas filas, retornando uma nova fila como resultado, sem 
 alterar as filas originais.
+
 */
