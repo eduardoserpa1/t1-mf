@@ -1,37 +1,3 @@
-/*
-    method adicionar(element: int)
-    requires IsValid()
-    modifies this
-    //ensures filaAbstrata == old(filaAbstrata) + [element]
-    ensures IsValid()
-    {   
-        var novoArray := new int[capacidade];
-        if (tamanho == capacidade) {
-            novoArray := new int[2 * capacidade];
-        }
-        var i := 0;
-        while(i < tamanho) 
-        invariant 0 <= i <= tamanho <= elementos.Length <= novoArray.Length; 
-        {
-            var index := inicio + i;
-
-            novoArray[i] := elementos[index % elementos.Length];
-            
-            i := i + 1;
-        }
-        
-        capacidade := 2 * capacidade;
-        inicio := 0;
-        fim := tamanho;
-        
-        novoArray[fim] := element;
-        fim := (fim + 1) % elementos.Length;
-        tamanho := tamanho + 1;
-        filaAbstrata := filaAbstrata + [element];
-        elementos := novoArray;
-    }
-*/
-
 class CircularQueue {
     var tamanho: int;
     var inicio: int;
@@ -96,12 +62,13 @@ class CircularQueue {
     requires IsValid()
     modifies this
     ensures IsValid()
+    ensures tamanho == old(tamanho) + 1
     {   
         var novoArray := new int[2 * elementos.Length];
         if (tamanho == elementos.Length) {
-            
             var i := 0;
             while(i < tamanho) 
+            invariant tamanho == old(tamanho);
             invariant 0 <= i <= tamanho <= elementos.Length < novoArray.Length; 
             {
                 var index := inicio + i;
@@ -115,14 +82,15 @@ class CircularQueue {
             fim := tamanho;
             novoArray[fim] := element;
             fim := (fim + 1) % elementos.Length;
-           
             tamanho := tamanho + 1;
             //filaAbstrata := filaAbstrata + [element];
             elementos := novoArray;
         } else {
             var novoArray_igual := new int[elementos.Length];
             var i := 0;
+
             while(i < tamanho) 
+            invariant tamanho == old(tamanho);
             invariant 0 <= i <= tamanho <= novoArray_igual.Length == elementos.Length;
             invariant 0 <= inicio < elementos.Length;
             invariant 0 <= fim < elementos.Length; 
@@ -133,17 +101,11 @@ class CircularQueue {
             }
            
             novoArray_igual[fim] := element;
-            fim := (fim + 1) - novoArray_igual.Length;
-            fim := fim + 1;
-            fim := elementos.Length - 1;
-            tamanho := tamanho + 1;
-                
+            fim := (fim + 1) % novoArray_igual.Length;
+            tamanho := tamanho + 1;  
             //filaAbstrata := filaAbstrata + [element];
-            
             elementos := novoArray_igual;
-            
         }
-    
         
     }
 
@@ -176,6 +138,11 @@ method main()
     fila.adicionar(3);
 
     var tamanho_depois_de_adicionar := fila.Tamanho();
+    var vazia_depois_de_adicionar := fila.EstaVazia();
+
+
+    assert tamanho_depois_de_adicionar == 3;
+    assert !vazia_depois_de_adicionar;
 
 }
 /*
