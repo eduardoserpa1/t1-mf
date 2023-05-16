@@ -3,12 +3,12 @@ class CircularQueue {
     var inicio: int;
     var fim: int;
     var elementos: array<int>;
-    //var filaAbstrata: seq<int>;
+    ghost var filaAbstrata: seq<int>;
 
     predicate IsValid() reads this, elementos {
         0 <= inicio < elementos.Length &&
         0 <= fim < elementos.Length &&
-        0 <= tamanho <= elementos.Length
+        0 <= tamanho <= elementos.Length 
         //tamanho == |filaAbstrata| 
         //(forall i: int :: 0 <= i < tamanho ==> elementos[(inicio + i) % elementos.Length] == filaAbstrata[i])
     }
@@ -43,7 +43,7 @@ class CircularQueue {
     requires IsValid()
     //ensures contains ==> (forall i,j: int ::  0 <= i == j < tamanho ==> elementos[i] != element && exists j: int :: 0 <= j < elementos.Length && elementos[j] == element)
     //ensures contains ==> (exists i:int :: 0 <= i < tamanho <= elementos.Length && elementos[i] == element)
-    //ensures contains <==> exists i :: 0 <= i < tamanho == elementos.Length && elementos[i] == element
+    //ensures contains ==> exists i :: 0 <= i < tamanho == elementos.Length && elementos[i] == element
     //ensures contains == false ==> (forall i : int :: 0 <= i < tamanho == elementos.Length && elementos[i] != element)
     //ensures contains == false ==>  0 >= tamanho == elementos.Length
     //ensures contains ==> !(elementos.Length == 0)
@@ -90,7 +90,7 @@ class CircularQueue {
             novoArray[fim] := element;
             fim := (fim + 1) % elementos.Length;
             tamanho := tamanho + 1;
-            //filaAbstrata := filaAbstrata + [element];
+            filaAbstrata := filaAbstrata + [element];
             elementos := novoArray;
         } else {
             var novoArray_igual := new int[elementos.Length];
@@ -110,7 +110,7 @@ class CircularQueue {
             novoArray_igual[fim] := element;
             fim := (fim + 1) % novoArray_igual.Length;
             tamanho := tamanho + 1;  
-            //filaAbstrata := filaAbstrata + [element];
+            filaAbstrata := filaAbstrata + [element];
             elementos := novoArray_igual;
         }
         
@@ -138,6 +138,7 @@ class CircularQueue {
             i := i + 1;
         }
 
+        //filaAbstrata := filaAbstrata - [elementos[inicio]];
         valorRemovido := elementos[inicio];
         inicio := (inicio + 1) % elementos.Length;
         tamanho := tamanho - 1;
@@ -154,7 +155,7 @@ method main()
 
     assert tamanho == 0;
     //assert numero_elementos == 0;
-    assert vazia == true;
+    assert vazia;
     
     fila.adicionar(1);
     fila.adicionar(2);
@@ -173,22 +174,21 @@ method main()
     var tamanho_depois_de_remover := fila.Tamanho();
 
     assert tamanho_depois_de_remover == 1;
-    //assert valor_removido == 1;
+    //assert valor_removido == 2;
 }
+
 /*
-
-
-x Retornar o número de elementos da fila.
 
 x Realizar a concatenação de duas filas, retornando uma nova fila como resultado, sem 
 alterar as filas originais.
 
+(funcionando) Retornar o número de elementos da fila.
 (funcionando) Adicionar um novo elemento na fila.
-(testar, fazer pós condição) Verificar se um determinado elemento pertence o não a fila.
 (funcionando) Verificar se a fila é vazia ou não.
 (funcionando) Construtor deve instanciar uma fila vazia.
-(testar) Remover um elemento da fila e retornar seu valor caso a fila contenha elementos.
 
+x(funcionando, porém não prova o elemento removido) Remover um elemento da fila e retornar seu valor caso a fila contenha elementos.
+x(testar, fazer pós condição) Verificar se um determinado elemento pertence o não a fila.
 
 
 */
