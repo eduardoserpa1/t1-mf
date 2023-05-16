@@ -37,24 +37,29 @@ class CircularQueue {
         n := tamanho;
     }
 
-    method Contem(element: int) returns (contains: bool)
+    method contem(element: int) returns (contains: bool)
     requires valido()
     ensures elementos == old(elementos)
+    ensures contains ==> exists i :: 0 <= i < elementos.Length && elementos[i] == element
     ensures valido()
     {
         var i := 0;
 
         var pertence := false;
 
-        while(i < tamanho)
-        invariant 0 <= i <= tamanho <= elementos.Length; 
+        while(i < elementos.Length)
+        invariant 0 <= i <= elementos.Length; 
         invariant elementos == old(elementos)
+        invariant pertence ==> exists i :: 0 <= i < elementos.Length && elementos[i] == element
         {
-            if(elementos[(inicio + i) % elementos.Length] == element){
+            if(elementos[i] == element){
                 pertence := true;
+                break;
             }
             i := i + 1;
         }
+
+        assert pertence ==> exists i :: 0 <= i < elementos.Length && elementos[i] == element;
         contains := pertence;
     }
 
@@ -158,11 +163,11 @@ method main()
 
     var tamanho_depois_de_adicionar := fila.numero_elementos();
     var vazia_depois_de_adicionar := fila.vazia();
-    var contem := fila.Contem(2);
+    var contem_elemento := fila.contem(2);
 
     assert tamanho_depois_de_adicionar == 3;
     assert !vazia_depois_de_adicionar;
-    //assert contem;
+    assert contem_elemento;
 
     var valor_removido := fila.remover();
     valor_removido := fila.remover();
