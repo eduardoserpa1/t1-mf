@@ -92,7 +92,7 @@ class CircularQueue {
     }
 
 
-    method Adicionar(element: int)
+    method adicionar(element: int)
     requires IsValid()
     modifies this
     ensures IsValid()
@@ -119,26 +119,32 @@ class CircularQueue {
             tamanho := tamanho + 1;
             //filaAbstrata := filaAbstrata + [element];
             elementos := novoArray;
-        } else if (tamanho < elementos.Length) {
+        } else {
             var novoArray_igual := new int[elementos.Length];
             var i := 0;
             while(i < tamanho) 
-            invariant 0 <= i <= tamanho <= novoArray_igual.Length == elementos.Length; 
+            invariant 0 <= i <= tamanho <= novoArray_igual.Length == elementos.Length;
+            invariant 0 <= inicio < elementos.Length;
+            invariant 0 <= fim < elementos.Length; 
+            invariant tamanho < elementos.Length; 
             {
                 novoArray_igual[i] := elementos[i];
                 i := i + 1;
             }
-            if(fim < novoArray_igual.Length && fim > 0){
-                novoArray_igual[fim] := element;
-                fim := (fim + 1) % novoArray_igual.Length;
-                if(tamanho < elementos.Length){
-                    tamanho := tamanho + 1;
-                }
+           
+            novoArray_igual[fim] := element;
+            fim := (fim + 1) - novoArray_igual.Length;
+            fim := fim + 1;
+            fim := elementos.Length - 1;
+            tamanho := tamanho + 1;
                 
-                //filaAbstrata := filaAbstrata + [element];
-            }
+            //filaAbstrata := filaAbstrata + [element];
+            
             elementos := novoArray_igual;
+            
         }
+    
+        
     }
 
     method Remover() returns (valorRemovido: int)
@@ -165,12 +171,12 @@ method main()
     //assert numero_elementos == 0;
     assert vazia == true;
     
-    //fila.adicionar(1);
-   
-    
-    var esta_vazia := fila.EstaVazia();
-    
-    assert esta_vazia;
+    fila.adicionar(1);
+    fila.adicionar(2);
+    fila.adicionar(3);
+
+    var tamanho_depois_de_adicionar := fila.Tamanho();
+
 }
 /*
 
