@@ -41,20 +41,27 @@ class CircularQueue {
 
     method Contem(element: int) returns (contains: bool)
     requires IsValid()
-    //ensures contains <==> (forall i: int ::  0 <= i < tamanho ==> elementos[i] == element)
+    //ensures contains ==> (forall i,j: int ::  0 <= i == j < tamanho ==> elementos[i] != element && exists j: int :: 0 <= j < elementos.Length && elementos[j] == element)
+    //ensures contains ==> (exists i:int :: 0 <= i < tamanho <= elementos.Length && elementos[i] == element)
+    //ensures contains <==> exists i :: 0 <= i < tamanho == elementos.Length && elementos[i] == element
+    //ensures contains == false ==> (forall i : int :: 0 <= i < tamanho == elementos.Length && elementos[i] != element)
+    //ensures contains == false ==>  0 >= tamanho == elementos.Length
+    //ensures contains ==> !(elementos.Length == 0)
     ensures IsValid()
     {
         var i := 0;
 
+        var pertence := false;
+
         while(i < tamanho)
-        invariant 0 <= i <= tamanho; 
+        invariant 0 <= i <= tamanho <= elementos.Length; 
         {
             if(elementos[(inicio + i) % elementos.Length] == element){
-                contains := true;
+                pertence := true;
             }
             i := i + 1;
         }
-        contains := false;
+        contains := pertence;
     }
 
 
@@ -116,9 +123,25 @@ class CircularQueue {
     ensures IsValid()
     ensures tamanho == old(tamanho) - 1
     {
+        var novoArray_igual := new int[elementos.Length];
+        var i := 0;
+
+        while(i < tamanho) 
+        invariant tamanho == old(tamanho);
+        invariant 0 <= i <= tamanho <= novoArray_igual.Length == elementos.Length;
+        invariant 0 <= inicio < elementos.Length;
+        invariant 0 <= fim < elementos.Length; 
+        {
+            if(i != inicio){
+                novoArray_igual[i] := elementos[i];
+            }
+            i := i + 1;
+        }
+
         valorRemovido := elementos[inicio];
         inicio := (inicio + 1) % elementos.Length;
         tamanho := tamanho - 1;
+        elementos := novoArray_igual;
     }    
 }
 
@@ -139,23 +162,33 @@ method main()
 
     var tamanho_depois_de_adicionar := fila.Tamanho();
     var vazia_depois_de_adicionar := fila.EstaVazia();
-
+    var contem := fila.Contem(2);
 
     assert tamanho_depois_de_adicionar == 3;
     assert !vazia_depois_de_adicionar;
+    //assert contem;
 
+    var valor_removido := fila.Remover();
+    valor_removido := fila.Remover();
+    var tamanho_depois_de_remover := fila.Tamanho();
+
+    assert tamanho_depois_de_remover == 1;
+    //assert valor_removido == 1;
 }
 /*
 
-x Construtor deve instanciar uma fila vazia.
+
 x Retornar o número de elementos da fila.
-x Verificar se a fila é vazia ou não.
-x Remover um elemento da fila e retornar seu valor caso a fila contenha elementos.
 
-(testar) Adicionar um novo elemento na fila.
-(testar) Verificar se um determinado elemento pertence o não a fila.
-
-• Realizar a concatenação de duas filas, retornando uma nova fila como resultado, sem 
+x Realizar a concatenação de duas filas, retornando uma nova fila como resultado, sem 
 alterar as filas originais.
+
+(funcionando) Adicionar um novo elemento na fila.
+(testar, fazer pós condição) Verificar se um determinado elemento pertence o não a fila.
+(funcionando) Verificar se a fila é vazia ou não.
+(funcionando) Construtor deve instanciar uma fila vazia.
+(testar) Remover um elemento da fila e retornar seu valor caso a fila contenha elementos.
+
+
 
 */
